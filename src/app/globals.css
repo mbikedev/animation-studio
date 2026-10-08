@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens: dark studio theme by default, light theme available. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef0f6;
+  --foreground: #12131a;
+  --muted: #5b6070;
+  --border: #dde0ea;
+  --accent: #5b4df5;
+  --accent-foreground: #ffffff;
+  --accent-soft: #e9e7ff;
+  --success: #12805c;
+  --warning: #a35c00;
+  --danger: #c0262d;
+  --ring: #5b4df5;
+}
+
+.dark {
+  --background: #0d0e12;
+  --surface: #15171d;
+  --surface-2: #1d2028;
+  --foreground: #eceef4;
+  --muted: #9aa0b2;
+  --border: #2a2e39;
+  --accent: #8b7fff;
+  --accent-foreground: #0d0e12;
+  --accent-soft: #24213f;
+  --success: #3fcf9a;
+  --warning: #f2b45a;
+  --danger: #ff6b6b;
+  --ring: #a99fff;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Visible keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
