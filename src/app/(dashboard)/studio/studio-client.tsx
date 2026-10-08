@@ -2,6 +2,7 @@
 
 import { AudioLines, FileAudio, ImagePlus, Loader2, Plus, Sparkles, Upload } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GenerationProgress, VideoResult } from "@/components/generation-status";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,9 @@ export function StudioClient(props: {
   const [launching, setLaunching] = useState(false);
   const [generation, setGeneration] = useState<PresentedGeneration | null>(null);
   const submissionId = useRef<string>(crypto.randomUUID());
+  const router = useRouter();
+  // Bumped when credits move (launch, settlement) so balances are re-read.
+  const [balanceVersion, setBalanceVersion] = useState(0);
 
   const options = useMemo(() => {
     if (!projectId || !image) return null;
@@ -104,7 +108,16 @@ export function StudioClient(props: {
       controller.abort();
       clearTimeout(t);
     };
-  }, [options, props.enabled]);
+  }, [options, props.enabled, balanceVersion]);
+
+  // Credits are reserved at launch and settled at the end: refresh the sidebar
+  // balance (server layout) and the estimate's available balance.
+  const generationStatus = generation?.status;
+  useEffect(() => {
+    if (!generationStatus || !["queued", "succeeded", "failed", "canceled"].includes(generationStatus)) return;
+    router.refresh();
+    setBalanceVersion((v) => v + 1);
+  }, [generationStatus, router]);
 
   // Poll the current generation until it reaches a final state.
   useEffect(() => {
@@ -348,12 +361,10 @@ export function StudioClient(props: {
       <div className="grid content-start gap-6 lg:sticky lg:top-6">
         <Card>
           <CardTitle>Aperçu</CardTitle>
-          <div className="mt-4 grid place-items-center overflow-hidden rounded-lg bg-surface-2" style={{ aspectRatio: aspectRatio.replace(":", " / ") }}>
-            {generation?.videoUrl ? (
-              <span className="sr-only">Vidéo prête ci-dessous</span>
-            ) : image ? (
+          <div className="relative mt-4 grid place-items-center overflow-hidden rounded-lg bg-surface-2" style={{ aspectRatio: aspectRatio.replace(":", " / ") }}>
+            {image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={image.previewUrl} alt="Image du personnage importée" className="h-full w-full object-contain" />
+              <img src={image.previewUrl} alt="Image du personnage importée" className="absolute inset-0 h-full w-full object-contain" />
             ) : (
               <p className="p-6 text-center text-sm text-muted">L&apos;aperçu de votre personnage apparaîtra ici.</p>
             )}
